@@ -1,20 +1,15 @@
-import { Oval } from 'react-loader-spinner';
-
-const Loader = () => {
-  return (
-    <Oval
-      height={150}
-      width={150}
-      color="#374fdd"
-      wrapperStyle={{}}
-      wrapperClass=""
+import LoaderStyled from './Loader.styled';
+import { Dna } from 'react-loader-spinner';
+const Loader = () => (
+  <LoaderStyled>
+    <Dna
       visible={true}
-      ariaLabel="oval-loading"
-      secondaryColor="#162aa6"
-      strokeWidth={4}
-      strokeWidthSecondary={4}
+      height="80"
+      width="80"
+      ariaLabel="dna-loading"
+      wrapperStyle={{}}
+      wrapperClass="dna-wrapper"
     />
-  );
-};
-
+  </LoaderStyled>
+);
 export default Loader;

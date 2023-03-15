@@ -1,59 +1,69 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
+import {fetchImagesByName} from './service';
+import Loader from './Loader';
+import Button from './Button';
 import ImageGallery from './ImageGallery';
+import SearchForm from './SearchForm';
 import Searchbar from './Searchbar';
-import { Modal } from './Modal';
-import { Wrapper } from './App.styled';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-class App extends Component {
-  state = {
-    searchQuery: '',
-    imgUrl: '',
-    tags: '',
-    showModal: false,
-    buttonDiasbled: true,
-  };
+import AppStyled from './App.styled';
 
-  handleSubmit = searchQuery => {
-    this.setState({
-      searchQuery,
+export const App = () => {
+  const [gallery, setGallery] = useState([]);
+  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState('');
+  const [total, setTotal] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [imageURL, setImageURL] = useState(null);
+
+  useEffect(() => {
+    if (query.trim().length === 0) {
+      return;
+    }
+    fetchImagesByName(query, page).then(data => {
+      setGallery(prevState => [...prevState, ...data.hits]);
+      setTotal(data.totalHits);
+      setLoading(false);
     });
+  }, [query, page]);
+
+  const handleLoadMoreBtn = () => {
+    setPage(prevState => prevState + 1);
+    setLoading(true);
   };
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
+  const handleSubmit = query => {
+    if (query.trim().length === 0) {
+      return;
+    }
+    setGallery([]);
+    setPage(1);
+    setTotal(null);
+    setImageURL(null);
+    setQuery(query);
   };
 
-  onCardClick = (largeImageUrl, imageTags) => {
-    this.setState({
-      imgUrl: largeImageUrl,
-      tags: imageTags,
-    });
-    this.toggleModal();
+  const onClickGalleryImage = imageURL => {
+    setImageURL(imageURL);
   };
 
-  render() {
-    const { searchQuery, imgUrl, tags, showModal } = this.state;
-
-    return (
-      <Wrapper>
-        <Searchbar onSubmit={this.handleSubmit} searchQuery={searchQuery} />
-        <ImageGallery
-          onCardClick={this.onCardClick}
-          searchQuery={searchQuery}
-          onOpenModal={this.toggleModal}
-        />
-        {showModal && (
-          <Modal onCloseModal={this.toggleModal}>
-            {<img src={imgUrl} alt={tags} />}
-          </Modal>
-        )}
-        <ToastContainer autoClose={3000} theme="dark" />
-      </Wrapper>
-    );
-  }
-}
-
-export default App;
+  return (
+    <AppStyled>
+      <Searchbar>
+        <SearchForm onSubmit={handleSubmit} />
+      </Searchbar>
+      {gallery.length > 0 && (
+        <>
+          <ImageGallery
+            galleryList={gallery}
+            onClick={onClickGalleryImage}
+            imageURL={imageURL}
+          />
+          {total !== gallery.length && (
+            <Button text="Load more" onClick={handleLoadMoreBtn} />
+          )}
+        </>
+      )}
+      {loading && <Loader />}
+    </AppStyled>
+  );
+};
