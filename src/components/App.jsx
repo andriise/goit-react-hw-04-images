@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {fetchImagesByName} from './service';
+import { fetchImagesByName } from './service';
 import Loader from './Loader';
 import Button from './Button';
 import ImageGallery from './ImageGallery';
